@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+        android:id="@+id/activity_camera"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.softensy.customcamera.CameraActivity">
+
+        <SurfaceView
+            android:id="@+id/camera_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+        <ProgressBar
+            android:id="@+id/record_time"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:indeterminate="false"
+            android:max="10"
+            android:progress="3"
+            android:progressDrawable="@drawable/progress" />
+
+        <ImageButton
+            android:id="@+id/exit_btn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_below="@+id/record_time"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_close_white_24dp" />
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/camera_btn"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/circle_semitrans_btn"
+                android:src="@drawable/ic_photo_camera_white_30dp" />
+
+            <ImageButton
+                android:id="@+id/flash_btn"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/circle_semitrans_btn"
+                android:src="@drawable/ic_flash_off_white_30dp" />
+
+            <ImageButton
+                android:id="@+id/delay_btn"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_margin="10dp"
+                android:background="@drawable/circle_semitrans_btn"
+                android:src="@drawable/ic_timer_3_white_30dp" />
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true">
+
+            <ImageButton
+                android:id="@+id/record_btn"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_record" />
+
+            <ImageButton
+                android:id="@+id/delete_btn"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/record_btn"
+                android:layout_toStartOf="@+id/record_btn"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_remove_white_24dp" />
+
+            <ImageButton
+                android:id="@+id/confirm_btn"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/record_btn"
+                android:layout_toRightOf="@+id/record_btn"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_confirm" />
+
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+</layout>
