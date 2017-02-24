@@ -6,6 +6,7 @@ import android.databinding.DataBindingUtil;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -13,20 +14,32 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
-import android.view.View;
 
+import com.googlecode.mp4parser.BasicContainer;
+import com.googlecode.mp4parser.authoring.Movie;
+import com.googlecode.mp4parser.authoring.Track;
+import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
+import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
+import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
 import com.softensy.customcamera.databinding.ActivityCameraBinding;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
-//http://stackoverflow.com/questions/20325615/android-concatenate-two-videos
+
+//http://stackoverflow.com/questions/26035547/how-to-pause-resume-the-video-recording
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -42,6 +55,15 @@ public class CameraActivity extends AppCompatActivity {
 
     boolean flashOn = false;
 
+    Handler recordHandler = new Handler();
+    Runnable runRecord = () -> {
+        if (prepareVideoRecorder()) {
+            mediaRecorder.start();
+        } else {
+            releaseMediaRecorder();
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,12 +75,12 @@ public class CameraActivity extends AppCompatActivity {
     private void initBtns() {
         binding.exitBtn.setOnClickListener(v -> finish());
 
-        binding.recordBtn.setOnTouchListener((v, event) -> record(event));
-        binding.cameraBtn.setOnClickListener(v -> takePicture());
-        binding.flashBtn.setOnClickListener(v -> switchFlash());
+        binding.recordBtn.setOnTouchListener((v, event) -> onRecordPressed(event));
+        binding.cameraBtn.setOnClickListener(v -> onCameraPressed());
+        binding.flashBtn.setOnClickListener(v -> onFlashPressed());
     }
 
-    private void switchFlash() {
+    private void onFlashPressed() {
         if (flashOn) {
             flashOn = false;
             binding.flashBtn.setImageResource(R.drawable.ic_flash_on_white_30dp);
@@ -151,27 +173,16 @@ public class CameraActivity extends AppCompatActivity {
         camera = null;
     }
 
-    Handler h = new Handler();
 
-    Runnable run = () -> {
-        if (prepareVideoRecorder()) {
-            mediaRecorder.start();
-        } else {
-            releaseMediaRecorder();
-        }
-    };
-
-
-    public boolean record(MotionEvent event) {
-
+    public boolean onRecordPressed(MotionEvent event) {
 
         int action = event.getAction();
         if (action == MotionEvent.ACTION_DOWN) {
             binding.recordBtn.setImageResource(R.drawable.ic_record_pressed);
-            h.postDelayed(run, 500);
+            recordHandler.postDelayed(runRecord, 500);
             return true;
         } else if (action == MotionEvent.ACTION_UP) {
-            h.removeCallbacks(run);
+            recordHandler.removeCallbacks(runRecord);
             if (mediaRecorder != null) {
                 mediaRecorder.stop();
                 releaseMediaRecorder();
@@ -179,11 +190,10 @@ public class CameraActivity extends AppCompatActivity {
             binding.recordBtn.setImageResource(R.drawable.ic_record);
             return true;
         }
-
         return false;
     }
 
-    public void takePicture() {
+    public void onCameraPressed() {
         camera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] data, Camera camera) {
@@ -199,7 +209,6 @@ public class CameraActivity extends AppCompatActivity {
                 camera.startPreview();
             }
         });
-
     }
 
     private boolean prepareVideoRecorder() {
@@ -210,8 +219,7 @@ public class CameraActivity extends AppCompatActivity {
         mediaRecorder.setCamera(camera);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mediaRecorder.setProfile(CamcorderProfile
-                .get(CamcorderProfile.QUALITY_HIGH));
+        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
         mediaRecorder.setPreviewDisplay(binding.cameraView.getHolder().getSurface());
         mediaRecorder.setOrientationHint(90);
@@ -232,6 +240,84 @@ public class CameraActivity extends AppCompatActivity {
             mediaRecorder.release();
             mediaRecorder = null;
             camera.lock();
+        }
+    }
+
+
+
+    public class MergeVideo extends AsyncTask<String, Integer, String> {
+
+        int count;
+        String filename;
+
+
+        @Override
+        protected void onPreExecute() {
+
+        };
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                String paths[] = new String[count];
+                Movie[] inMovies = new Movie[count];
+                for (int i = 0; i < count; i++) {
+                    paths[i] = path + filename + String.valueOf(i + 1) + ".mp4";
+                    inMovies[i] = MovieCreator.build(new FileInputStream(paths[i]).getChannel());
+                }
+                List<Track> videoTracks = new LinkedList<Track>();
+                List<Track> audioTracks = new LinkedList<Track>();
+                for (Movie m : inMovies) {
+                    for (Track t : m.getTracks()) {
+                        if (t.getHandler().equals("soun")) {
+                            audioTracks.add(t);
+                        }
+                        if (t.getHandler().equals("vide")) {
+                            videoTracks.add(t);
+                        }
+                    }
+                }
+
+                Movie result = new Movie();
+
+                if (audioTracks.size() > 0) {
+                    result.addTrack(new AppendTrack(audioTracks
+                            .toArray(new Track[audioTracks.size()])));
+                }
+                if (videoTracks.size() > 0) {
+                    result.addTrack(new AppendTrack(videoTracks
+                            .toArray(new Track[videoTracks.size()])));
+                }
+
+                BasicContainer out = (BasicContainer) new DefaultMp4Builder()
+                        .build(result);
+
+                @SuppressWarnings("resource")
+                FileChannel fc = new RandomAccessFile(String.format(Environment
+                        .getExternalStorageDirectory() + "/wishbyvideo.mp4"),
+                        "rw").getChannel();
+                out.writeContainer(fc);
+                fc.close();
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            String mFileName = Environment.getExternalStorageDirectory()
+                    .getAbsolutePath();
+            mFileName += "/wishbyvideo.mp4";
+            filename = mFileName;
+            return mFileName;
+        }
+
+        @Override
+        protected void onPostExecute(String value) {
+            super.onPostExecute(value);
+
+
+
         }
     }
 }
