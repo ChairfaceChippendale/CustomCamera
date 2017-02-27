@@ -16,20 +16,21 @@
             />
 
         <ProgressBar
-            android:id="@+id/record_time"
+            android:id="@+id/timeline"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="20dp"
             android:indeterminate="false"
-            android:max="10"
-            android:progress="3"
-            android:progressDrawable="@drawable/progress" />
+            android:max="10000"
+            tools:progress="3000"
+            android:progress="0"
+            android:progressDrawable="@drawable/progress_2" />
 
         <ImageButton
             android:id="@+id/exit_btn"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_below="@+id/record_time"
+            android:layout_below="@+id/timeline"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_close_white_24dp" />
