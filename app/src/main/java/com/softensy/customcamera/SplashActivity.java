@@ -3,11 +3,14 @@ package com.softensy.customcamera;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import java.io.File;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -34,6 +37,7 @@ public class SplashActivity extends AppCompatActivity {
                     },
                     PERMISSIONS_REQUEST);
         } else {
+            createDir ();
             startActivity(new Intent(this, CameraActivity.class));
             finish();
         }
@@ -48,6 +52,8 @@ public class SplashActivity extends AppCompatActivity {
                         grantResults[0] == PackageManager.PERMISSION_GRANTED &&
                         grantResults[1] == PackageManager.PERMISSION_GRANTED &&
                         grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+
+                    createDir ();
                     startActivity(new Intent(this, CameraActivity.class));
                     finish();
                 } else {
@@ -55,5 +61,13 @@ public class SplashActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    void createDir (){
+        String path = getString(R.string.app_name) + "/temp/";
+
+        File dir = new File(Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString(), path);
+        dir.mkdirs();
     }
 }

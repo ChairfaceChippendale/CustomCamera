@@ -24,7 +24,7 @@
             android:max="10000"
             tools:progress="3000"
             android:progress="0"
-            android:progressDrawable="@drawable/progress_2" />
+            android:progressDrawable="@drawable/progress_red" />
 
         <ImageButton
             android:id="@+id/exit_btn"
@@ -107,6 +107,21 @@
 
 
         </RelativeLayout>
+
+
+        <FrameLayout
+            android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            android:visibility="gone"
+            >
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_tripod"
+                android:layout_gravity="center"/>
+        </FrameLayout>
 
 
     </RelativeLayout>

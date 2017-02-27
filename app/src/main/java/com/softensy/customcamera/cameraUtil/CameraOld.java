@@ -5,8 +5,6 @@ import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.view.SurfaceHolder;
 
-import com.softensy.customcamera.VideoSegment;
-
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -14,7 +12,6 @@ public class CameraOld implements CameraSupport {
 
     Camera camera;
     MediaRecorder mediaRecorder;
-
     SurfaceHolder surfaceHolder;
 
     File videoFile;
@@ -96,7 +93,7 @@ public class CameraOld implements CameraSupport {
                 mediaRecorder.stop();
             } catch (RuntimeException e) {
                 e.printStackTrace();
-                videoFile.delete(); //TODO check if deleted
+                videoFile.delete();
                 return null;
             }
             releaseMediaRecorder();
