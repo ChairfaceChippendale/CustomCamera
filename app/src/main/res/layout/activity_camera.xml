@@ -81,7 +81,7 @@
                 android:layout_centerInParent="true"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_record"
+                android:src="@drawable/ic_record_pause"
                 />
 
             <ImageButton
@@ -91,7 +91,7 @@
                 android:layout_centerInParent="true"
                 android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_record_pressed"
+                android:src="@drawable/ic_record_run"
                 android:visibility="gone"/>
 
             <ImageButton

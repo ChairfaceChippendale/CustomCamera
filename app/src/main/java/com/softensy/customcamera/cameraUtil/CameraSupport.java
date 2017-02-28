@@ -7,6 +7,5 @@ public interface CameraSupport {
     void startRecord(File videoFile);
     File stopRecord();
     void releaseCamera();
-
     void takePicture(File imageFile);
 }
