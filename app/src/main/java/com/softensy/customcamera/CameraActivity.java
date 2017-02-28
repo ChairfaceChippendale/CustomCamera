@@ -13,7 +13,7 @@ import com.softensy.customcamera.cameraUtil.CameraControllerImpl;
 import com.softensy.customcamera.cameraUtil.CameraOld;
 import com.softensy.customcamera.databinding.ActivityCameraBinding;
 
-public class CameraActivity extends AppCompatActivity implements CameraControllerImpl.ProgressListener {
+public class CameraActivity extends AppCompatActivity implements CameraControllerImpl.Listener {
 
     private static final String TAG = CameraActivity.class.getSimpleName();
 

@@ -41,7 +41,7 @@ public class CameraControllerImpl implements CameraController {
     private static final int AUTO_REC_DELAY = 3000;
 
     private CameraSupport camera;
-    private ProgressListener progressListener;
+    private Listener listener;
     private int minVideoDurationMillisec;
     private int maxVideoDurationMillisec;
 
@@ -49,9 +49,9 @@ public class CameraControllerImpl implements CameraController {
 
     private Context context;
 
-    public CameraControllerImpl(CameraSupport camera, ProgressListener progressListener, int minVideoDurationMillisec, int maxVideoDurationMillisec, Context context) {
+    public CameraControllerImpl(CameraSupport camera, Listener listener, int minVideoDurationMillisec, int maxVideoDurationMillisec, Context context) {
         this.camera = camera;
-        this.progressListener = progressListener;
+        this.listener = listener;
         this.minVideoDurationMillisec = minVideoDurationMillisec;
         this.maxVideoDurationMillisec = maxVideoDurationMillisec;
         this.context = context;
@@ -68,9 +68,9 @@ public class CameraControllerImpl implements CameraController {
             totalVideoDuration = timeSwapBuff + segmentDurationInMillisec;
 
             if (totalVideoDuration > minVideoDurationMillisec) {
-                progressListener.updateTimeline((int) totalVideoDuration, R.drawable.progress_green);
+                listener.updateTimeline((int) totalVideoDuration, R.drawable.progress_green);
             } else {
-                progressListener.updateTimeline((int) totalVideoDuration, R.drawable.progress_red);
+                listener.updateTimeline((int) totalVideoDuration, R.drawable.progress_red);
             }
 
             if (totalVideoDuration >= maxVideoDurationMillisec) {
@@ -80,10 +80,10 @@ public class CameraControllerImpl implements CameraController {
                     timeSwapBuff += segmentDurationInMillisec;
                     videoSegments.addLast(new VideoSegment(videoFile, (int) segmentDurationInMillisec));
                 }
-                progressListener.setRecBtn(R.drawable.ic_record_pause);
-                progressListener.setInterfaceVisibility(true);
-                progressListener.setRecBtnVisibility(true);
-                progressListener.setStopAutoRecBtnVisibility(false);
+                listener.setRecBtn(R.drawable.ic_record_pause);
+                listener.setInterfaceVisibility(true);
+                listener.setRecBtnVisibility(true);
+                listener.setStopAutoRecBtnVisibility(false);
             } else {
                 customHandler.postDelayed(this, STEP_VIDEO_DURATION_MILLISEC);
             }
@@ -93,14 +93,14 @@ public class CameraControllerImpl implements CameraController {
     @Override
     public void delayRec() {
         if (totalVideoDuration <= maxVideoDurationMillisec) {
-            progressListener.setInterfaceVisibility(false);
-            progressListener.setRecBtnVisibility(false);
+            listener.setInterfaceVisibility(false);
+            listener.setRecBtnVisibility(false);
             new Handler().postDelayed(
                     () -> {
                         camera.startRecord(provideFileToRecord());
                         startHTime = SystemClock.uptimeMillis();
                         customHandler.postDelayed(updateTimer, 0);
-                        progressListener.setStopAutoRecBtnVisibility(true);
+                        listener.setStopAutoRecBtnVisibility(true);
                     },
                     AUTO_REC_DELAY);
         }
@@ -114,9 +114,9 @@ public class CameraControllerImpl implements CameraController {
             timeSwapBuff += segmentDurationInMillisec;
             addNewSegment(new VideoSegment(videoFile, (int) segmentDurationInMillisec));
         }
-        progressListener.setInterfaceVisibility(true);
-        progressListener.setRecBtnVisibility(true);
-        progressListener.setStopAutoRecBtnVisibility(false);
+        listener.setInterfaceVisibility(true);
+        listener.setRecBtnVisibility(true);
+        listener.setStopAutoRecBtnVisibility(false);
     }
 
 
@@ -127,14 +127,15 @@ public class CameraControllerImpl implements CameraController {
             startHTime = SystemClock.uptimeMillis();
             customHandler.postDelayed(updateTimer, 0);
         } else {
-            progressListener.showToast("Max video duration");
+            listener.showToast("Max video duration");
         }
-        progressListener.setRecBtn(R.drawable.ic_record_run);
-        progressListener.setInterfaceVisibility(false);
+        listener.setRecBtn(R.drawable.ic_record_run);
+        listener.setInterfaceVisibility(false);
     }
 
     @Override
     public void pauseRec() {
+
         customHandler.removeCallbacks(updateTimer);
         File videoFile = camera.stopRecord();
         if (totalVideoDuration <= maxVideoDurationMillisec && videoFile != null) {
@@ -142,8 +143,8 @@ public class CameraControllerImpl implements CameraController {
             addNewSegment(new VideoSegment(videoFile, (int) segmentDurationInMillisec));
             Log.d(TAG, "videoSegments added");
         }
-        progressListener.setRecBtn(R.drawable.ic_record_pause);
-        progressListener.setInterfaceVisibility(true);
+        listener.setRecBtn(R.drawable.ic_record_pause);
+        listener.setInterfaceVisibility(true);
     }
 
     @Override
@@ -173,9 +174,9 @@ public class CameraControllerImpl implements CameraController {
             totalVideoDuration -= toDel.getDuration();
             timeSwapBuff -= toDel.getDuration();
             if (totalVideoDuration < minVideoDurationMillisec) {
-                progressListener.updateTimeline((int) totalVideoDuration, R.drawable.progress_red);
+                listener.updateTimeline((int) totalVideoDuration, R.drawable.progress_red);
             } else {
-                progressListener.updateTimeline((int) totalVideoDuration, R.drawable.progress_green);
+                listener.updateTimeline((int) totalVideoDuration, R.drawable.progress_green);
             }
             toDel.getVideoFile().delete();
         }
@@ -208,7 +209,7 @@ public class CameraControllerImpl implements CameraController {
         if (totalVideoDuration > minVideoDurationMillisec) {
             new MergeVideo(videoSegments).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } else {
-            progressListener.showToast("Too shot");
+            listener.showToast("Too shot");
         }
     }
 
@@ -223,7 +224,7 @@ public class CameraControllerImpl implements CameraController {
 
         @Override
         protected void onPreExecute() {
-            progressListener.showProgressView(true);
+            listener.showProgressView(true);
         }
 
         @Override
@@ -285,7 +286,7 @@ public class CameraControllerImpl implements CameraController {
         protected void onPostExecute(Void value) {
             super.onPostExecute(value);
 
-            progressListener.showProgressView(false);
+            listener.showProgressView(false);
 
             for (VideoSegment vc : videoSegments) {
                 vc.getVideoFile().delete();
@@ -294,12 +295,12 @@ public class CameraControllerImpl implements CameraController {
             totalVideoDuration = 0L;
             timeSwapBuff = 0L;
 
-            progressListener.updateTimeline((int) totalVideoDuration, R.drawable.progress_red);
+            listener.updateTimeline((int) totalVideoDuration, R.drawable.progress_red);
         }
     }
 
 
-    public interface ProgressListener {
+    public interface Listener {
 
         void updateTimeline(int progress, @DrawableRes int timelineColor);
 
@@ -314,7 +315,6 @@ public class CameraControllerImpl implements CameraController {
         void showProgressView(boolean show);
 
         void showToast(String text);
-
 
     }
 
