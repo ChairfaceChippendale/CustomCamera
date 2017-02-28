@@ -40,10 +40,18 @@ buildscript {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    //Support
+    compile 'com.googlecode.mp4parser:isoparser:1.1.7'
+    compile 'com.android.support:appcompat-v7:25.2.0'
+
+    //RxAndroid
+//    compile 'io.reactivex:rxandroid:1.2.1'
+//    compile 'io.reactivex:rxjava:1.1.6'
+
+    //Tests
+    testCompile 'junit:junit:4.12'
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.googlecode.mp4parser:isoparser:1.1.7'
-    compile 'com.android.support:appcompat-v7:25.2.0'
-    testCompile 'junit:junit:4.12'
 }

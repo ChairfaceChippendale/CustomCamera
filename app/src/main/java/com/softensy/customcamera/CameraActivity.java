@@ -1,5 +1,7 @@
 package com.softensy.customcamera;
 
+import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -99,6 +101,8 @@ public class CameraActivity extends AppCompatActivity {
 
     boolean flashOn = false;
 
+
+     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,6 +110,7 @@ public class CameraActivity extends AppCompatActivity {
         cameraSupport = new CameraOld(binding.cameraView.getHolder());
         videoSegments = new ArrayDeque<>();
         initBtns();
+
     }
 
     private void initBtns() {
@@ -159,7 +164,6 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-
     private boolean onRecordPressed(int action) {
 
         if (action == MotionEvent.ACTION_DOWN) {
@@ -191,8 +195,6 @@ public class CameraActivity extends AppCompatActivity {
         }
         return false;
     }
-
-
 
 
     private void deleteLastVideoSegment() {
