@@ -72,8 +72,22 @@ public class CameraActivity extends AppCompatActivity {
             }
 
             if (totalVideoDuration >= MAX_VIDEO_DURATION_MILLISEC) {
-                cameraSupport.stopRecord();
                 customHandler.removeCallbacks(updateTimer);
+                File videoFile = cameraSupport.stopRecord();
+                if (videoFile != null) {
+                    timeSwapBuff += segmentDurationInMillisec;
+                    videoSegments.addLast(new VideoSegment(videoFile, (int) segmentDurationInMillisec));
+                }
+                binding.recordBtn.setImageResource(R.drawable.ic_record);
+                Log.d(TAG, "totalVideoDuration: " + totalVideoDuration + "\nsegmentDurationInMillisec: " + segmentDurationInMillisec + "\n timeSwapBuff: " + timeSwapBuff);
+                if (binding.stopAutoRecBtn.isShown()) {
+                    binding.stopAutoRecBtn.setVisibility(View.GONE);
+                    binding.cameraBtn.setVisibility(View.VISIBLE);
+                    binding.deleteBtn.setVisibility(View.VISIBLE);
+                    binding.confirmBtn.setVisibility(View.VISIBLE);
+                    binding.recordBtn.setVisibility(View.VISIBLE);
+                    binding.delayBtn.setVisibility(View.VISIBLE);
+                }
             } else {
                 customHandler.postDelayed(this, STEP_VIDEO_DURATION_MILLISEC);
             }
@@ -94,7 +108,55 @@ public class CameraActivity extends AppCompatActivity {
         initBtns();
     }
 
+    private void initBtns() {
+        binding.exitBtn.setOnClickListener(v -> finish());
+        binding.recordBtn.setOnTouchListener((v, event) -> onRecordPressed(event.getAction()));
+        binding.cameraBtn.setOnClickListener(v -> onPhotoPressed());
+        binding.flashBtn.setOnClickListener(v -> onFlashPressed());
+        binding.deleteBtn.setOnClickListener(v -> deleteLastVideoSegment());
+        binding.confirmBtn.setOnClickListener(v -> {
+            if (totalVideoDuration > MIN_VIDEO_DURATION_MILLISEC) {
+                new MergeVideo(videoSegments).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } else {
+                Toast.makeText(this, "Too shot", Toast.LENGTH_SHORT).show();
+            }
+        });
+        binding.delayBtn.setOnClickListener(v -> {
+            if (totalVideoDuration <= MAX_VIDEO_DURATION_MILLISEC) {
+                binding.cameraBtn.setVisibility(View.GONE);
+                binding.recordBtn.setVisibility(View.GONE);
+                binding.deleteBtn.setVisibility(View.GONE);
+                binding.confirmBtn.setVisibility(View.GONE);
+                binding.delayBtn.setVisibility(View.GONE);
+                new Handler().postDelayed(
+                        () -> {
+                            cameraSupport.startRecord(provideFileToRecord());
+                            startHTime = SystemClock.uptimeMillis();
+                            customHandler.postDelayed(updateTimer, 0);
+                            binding.stopAutoRecBtn.setVisibility(View.VISIBLE);
+                        },
+                        3000);
+            }
+        });
+        binding.stopAutoRecBtn.setOnClickListener(v -> {
+            customHandler.removeCallbacks(updateTimer);
 
+            File videoFile = cameraSupport.stopRecord();
+            if (totalVideoDuration <= MAX_VIDEO_DURATION_MILLISEC && videoFile != null) {
+                timeSwapBuff += segmentDurationInMillisec;
+                videoSegments.addLast(new VideoSegment(videoFile, (int) segmentDurationInMillisec));
+            }
+
+            binding.stopAutoRecBtn.setVisibility(View.GONE);
+            binding.cameraBtn.setVisibility(View.VISIBLE);
+            binding.deleteBtn.setVisibility(View.VISIBLE);
+            binding.confirmBtn.setVisibility(View.VISIBLE);
+            binding.recordBtn.setVisibility(View.VISIBLE);
+            binding.delayBtn.setVisibility(View.VISIBLE);
+
+        });
+
+    }
 
 
 
@@ -120,31 +182,18 @@ public class CameraActivity extends AppCompatActivity {
             if (totalVideoDuration <= MAX_VIDEO_DURATION_MILLISEC && videoFile != null) {
                 timeSwapBuff += segmentDurationInMillisec;
                 videoSegments.addLast(new VideoSegment(videoFile, (int) segmentDurationInMillisec));
+                Log.d(TAG, "videoSegments added");
             }
 
             binding.recordBtn.setImageResource(R.drawable.ic_record);
-            Log.d(TAG, "totalVideoDuration: " + totalVideoDuration + "\nsegmentDurationInMillisec: " + segmentDurationInMillisec + "\n timeSwapBuff: " + timeSwapBuff);
+//            Log.d(TAG, "totalVideoDuration: " + totalVideoDuration + "\nsegmentDurationInMillisec: " + segmentDurationInMillisec + "\n timeSwapBuff: " + timeSwapBuff);
             return true;
         }
         return false;
     }
 
 
-    private void initBtns() {
-        binding.exitBtn.setOnClickListener(v -> finish());
-        binding.recordBtn.setOnTouchListener((v, event) -> onRecordPressed(event.getAction()));
-        binding.cameraBtn.setOnClickListener(v -> onPhotoPressed());
-        binding.flashBtn.setOnClickListener(v -> onFlashPressed());
-        binding.deleteBtn.setOnClickListener(v -> deleteLastVideoSegment());
-        binding.confirmBtn.setOnClickListener(v -> {
-            if (totalVideoDuration > MIN_VIDEO_DURATION_MILLISEC) {
-                new MergeVideo(videoSegments).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            } else {
-                Toast.makeText(this, "Too shot", Toast.LENGTH_SHORT).show();
-            }
-        });
 
-    }
 
     private void deleteLastVideoSegment() {
         if (!videoSegments.isEmpty()) {
@@ -153,6 +202,7 @@ public class CameraActivity extends AppCompatActivity {
             timeSwapBuff -= toDel.getDuration();
             if (totalVideoDuration < MIN_VIDEO_DURATION_MILLISEC) {
                 binding.timeline.setProgressDrawable(getResources().getDrawable(R.drawable.progress_red));
+                timelineIsRed = true;
             }
             binding.timeline.setProgress((int) totalVideoDuration);
             toDel.getVideoFile().delete();

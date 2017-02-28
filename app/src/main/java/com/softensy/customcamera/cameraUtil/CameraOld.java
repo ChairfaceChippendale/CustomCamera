@@ -3,12 +3,15 @@ package com.softensy.customcamera.cameraUtil;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 import java.io.File;
 import java.io.FileOutputStream;
 
 public class CameraOld implements CameraSupport {
+
+    private static final String TAG = CameraOld.class.getSimpleName();
 
     Camera camera;
     MediaRecorder mediaRecorder;
@@ -56,7 +59,13 @@ public class CameraOld implements CameraSupport {
 
     private boolean prepareVideoRecorder(File videoFile) {
         mediaRecorder = new MediaRecorder();
-        camera.unlock();
+        try {
+            camera.unlock();
+        } catch (RuntimeException e){
+            Log.e(TAG, "Camera busy");
+            e.printStackTrace();
+            return false;
+        }
 
         mediaRecorder.setCamera(camera);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
