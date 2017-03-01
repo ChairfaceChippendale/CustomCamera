@@ -13,6 +13,8 @@ import com.softensy.customcamera.cameraUtil.CameraControllerImpl;
 import com.softensy.customcamera.cameraUtil.CameraOld;
 import com.softensy.customcamera.databinding.ActivityCameraBinding;
 
+//TODO video player https://android-arsenal.com/details/1/3584
+
 public class CameraActivity extends AppCompatActivity implements CameraControllerImpl.Listener {
 
     private static final String TAG = CameraActivity.class.getSimpleName();
