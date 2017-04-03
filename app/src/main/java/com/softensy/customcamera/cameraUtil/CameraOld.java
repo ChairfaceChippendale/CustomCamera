@@ -33,6 +33,8 @@ public class CameraOld implements CameraSupport {
         Camera.Parameters parameters = camera.getParameters();
         parameters.set("orientation", "portrait");
         parameters.setRotation(90);
+        //adding color effect
+        //parameters.setColorEffect(Camera.Parameters.EFFECT_NEGATIVE);
         camera.setParameters(parameters);
         if (camera != null) {
             surfaceHolder.addCallback(new SurfaceHolder.Callback() {
@@ -72,6 +74,7 @@ public class CameraOld implements CameraSupport {
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
+
         mediaRecorder.setPreviewDisplay(surfaceHolder.getSurface());
         mediaRecorder.setOrientationHint(90);
 
