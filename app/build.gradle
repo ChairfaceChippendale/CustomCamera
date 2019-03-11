@@ -1,15 +1,11 @@
 apply plugin: 'com.android.application'
 
-
-apply plugin: 'me.tatarka.retrolambda'
-
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 28
     defaultConfig {
         applicationId "com.softensy.customcamera"
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -29,29 +25,16 @@ android {
     }
 }
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.2.3'
-    }
-}
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     //Support
-    compile 'com.googlecode.mp4parser:isoparser:1.1.7'
-    compile 'com.android.support:appcompat-v7:25.2.0'
+    implementation 'com.googlecode.mp4parser:isoparser:1.1.7'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
 
     //RxAndroid
 //    compile 'io.reactivex:rxandroid:1.2.1'
 //    compile 'io.reactivex:rxjava:1.1.6'
 
-    //Tests
-    testCompile 'junit:junit:4.12'
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
 }

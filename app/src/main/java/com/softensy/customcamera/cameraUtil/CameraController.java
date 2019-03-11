@@ -1,7 +1,7 @@
 package com.softensy.customcamera.cameraUtil;
 
 /**
- * Created by Softensy Android Dev on 28.02.2017.
+ * Created by ujujzk on 28.02.2017.
  */
 
 public interface CameraController {
